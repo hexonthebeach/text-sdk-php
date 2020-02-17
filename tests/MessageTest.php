@@ -3,8 +3,9 @@ require __DIR__ .'/../vendor/autoload.php';
 
 use CMText\Channels;
 use CMText\Message;
+use PHPUnit\Framework\TestCase;
 
-class MessageTest extends PHPUnit_Framework_TestCase
+class MessageTest extends TestCase
 {
 
     /**
@@ -14,18 +15,13 @@ class MessageTest extends PHPUnit_Framework_TestCase
     {
         $testSender = 'test-sender';
 
-        try {
-            $new = new Message(
-                'test text',
-                $testSender,
-                [
-                    '00334455667788',
-                ]
-            );
-
-        }catch (\Exception $e){
-            $new = null;
-        }
+        $new = new Message(
+            'test text',
+            $testSender,
+            [
+                '00334455667788',
+            ]
+        );
 
         $this->assertInstanceOf(
             Message::class,
@@ -106,18 +102,11 @@ class MessageTest extends PHPUnit_Framework_TestCase
         }
 
         // verify Recipient limit is respected
-        try{
-            for ($i = 0; $i < Message::RECIPIENTS_MAXIMUM; ++$i){
-                $new->AddRecipients([
-                    str_pad('00', 13, strval($i))
-                ]);
-            }
-
-        }catch (\Exception $exception){
-            $this->assertInstanceOf(
-                \CMText\Exceptions\RecipientLimitException::class,
-                $exception
-            );
+        $this->expectException(\CMText\Exceptions\RecipientLimitException::class);
+        for ($i = 0; $i < Message::RECIPIENTS_MAXIMUM; ++$i){
+            $new->AddRecipients([
+                str_pad('00', 13, strval($i))
+            ]);
         }
     }
 

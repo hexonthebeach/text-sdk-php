@@ -1,7 +1,9 @@
 <?php
 
 
-class SuggestionsTest extends PHPUnit_Framework_TestCase
+use PHPUnit\Framework\TestCase;
+
+class SuggestionsTest extends TestCase
 {
 
     public function testBaseClassProperties()
@@ -221,44 +223,37 @@ class SuggestionsTest extends PHPUnit_Framework_TestCase
 
     public function testApplySuggestionToRichContent()
     {
-        try {
-            $richContent = new \CMText\RichContent\RichContent();
+        $richContent = new \CMText\RichContent\RichContent();
+        $richContent->AddSuggestion(
+            new \CMText\RichContent\Suggestions\DialSuggestion(
+                'test Label',
+                '+334455667788'
+            )
+        );
+
+        $this->assertInstanceOf(
+            \CMText\RichContent\RichContent::class,
+            $richContent
+        );
+
+        $this->assertJson( json_encode($richContent) );
+
+        $json = json_decode( json_encode($richContent) );
+
+        $this->assertCount(
+            1,
+            $json->suggestions
+        );
+
+
+        //  add too many Conversation parts
+        $this->expectException(\CMText\Exceptions\SuggestionsLimitException::class);
+        for($i = 0; $i < \CMText\RichContent\RichContent::SUGGESTIONS_LENGTH_LIMIT; ++$i){
             $richContent->AddSuggestion(
                 new \CMText\RichContent\Suggestions\DialSuggestion(
                     'test Label',
                     '+334455667788'
                 )
-            );
-
-            $this->assertInstanceOf(
-                \CMText\RichContent\RichContent::class,
-                $richContent
-            );
-
-            $this->assertJson( json_encode($richContent) );
-
-            $json = json_decode( json_encode($richContent) );
-
-            $this->assertCount(
-                1,
-                $json->suggestions
-            );
-
-
-            //  add too many Conversation parts
-            for($i = 0; $i < \CMText\RichContent\RichContent::SUGGESTIONS_LENGTH_LIMIT; ++$i){
-                $richContent->AddSuggestion(
-                    new \CMText\RichContent\Suggestions\DialSuggestion(
-                        'test Label',
-                        '+334455667788'
-                    )
-                );
-            }
-
-        }catch (\CMText\Exceptions\SuggestionsLimitException $suggestionsLengthException){
-            $this->assertInstanceOf(
-                \CMText\Exceptions\SuggestionsLimitException::class,
-                $suggestionsLengthException
             );
         }
     }

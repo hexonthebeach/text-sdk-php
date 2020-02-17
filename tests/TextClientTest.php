@@ -3,8 +3,9 @@ require __DIR__ .'/../vendor/autoload.php';
 
 
 use CMText\TextClient;
+use PHPUnit\Framework\TestCase;
 
-class TextClientTest extends PHPUnit_Framework_TestCase
+class TextClientTest extends TestCase
 {
 
     /**
@@ -30,22 +31,15 @@ class TextClientTest extends PHPUnit_Framework_TestCase
     {
         $client = new TextClient('your-api-key');
 
-        try{
-            $client->send(
-                array_fill(
-                    0,
-                    TextClient::MESSAGES_MAXIMUM + 1,
-                    new \CMText\Message()
-                )
-            );
+        $this->expectException(\CMText\Exceptions\MessagesLimitException::class);
 
-        }catch (\Exception $exception){
-            $this->assertInstanceOf(
-                \CMText\Exceptions\MessagesLimitException::class,
-                $exception
-            );
-
-        }
+        $client->send(
+            array_fill(
+                0,
+                TextClient::MESSAGES_MAXIMUM + 1,
+                new \CMText\Message()
+            )
+        );
     }
 
 
@@ -54,23 +48,19 @@ class TextClientTest extends PHPUnit_Framework_TestCase
      */
     public function testRecipientsLimit()
     {
-        try{
-            $client = new TextClient('your-api-key', 'unavailablehost');
+        $client = new TextClient('your-api-key', 'unavailablehost');
 
-            $recipients = array_fill(
-                0,
-                \CMText\Message::RECIPIENTS_MAXIMUM + 1,
-                '00334455667788'
-            );
+        $recipients = array_fill(
+            0,
+            \CMText\Message::RECIPIENTS_MAXIMUM + 1,
+            '00334455667788'
+        );
 
-            $client->SendMessage('body-content', 'CM.com', $recipients);
-
-        }catch (\Exception $exception){
-            $this->assertInstanceOf(
-                \CMText\Exceptions\RecipientLimitException::class,
-                $exception
-            );
-        }
+        $response = $client->SendMessage('body-content', 'CM.com', $recipients);
+        $this->assertEquals(
+            'Maximum amount of Recipients exceeded. (' . \CMText\Message::RECIPIENTS_MAXIMUM . ')',
+            $response->statusMessage
+        );
     }
 
 
@@ -79,24 +69,17 @@ class TextClientTest extends PHPUnit_Framework_TestCase
      */
     public function testRichMessageBuilding()
     {
-        try{
-            $message = new \CMText\Message('Message Text', 'Sender_name', ['Recipient_PhoneNumber']);
-            $message
-                ->WithChannels([\CMText\Channels::WHATSAPP])
-                ->WithHybridAppKey('your-secret-hybrid-app-key')
-                ->WithRichMessage(
-                    new \CMText\RichContent\Messages\MediaMessage(
-                        'cm.com',
-                        'https://avatars3.githubusercontent.com/u/8234794?s=200&v=4',
-                        'image/png'
-                    )
-                );
-
-        }catch (\Exception $exception){
-            $message = null;
-
-        }
-
+        $message = new \CMText\Message('Message Text', 'Sender_name', ['Recipient_PhoneNumber']);
+        $message
+            ->WithChannels([\CMText\Channels::WHATSAPP])
+            ->WithHybridAppKey('your-secret-hybrid-app-key')
+            ->WithRichMessage(
+                new \CMText\RichContent\Messages\MediaMessage(
+                    'cm.com',
+                    'https://avatars3.githubusercontent.com/u/8234794?s=200&v=4',
+                    'image/png'
+                )
+            );
 
         $this->assertInstanceOf(
             \CMText\Message::class,
@@ -129,19 +112,13 @@ class TextClientTest extends PHPUnit_Framework_TestCase
      */
     public function testRichMessageBuildingWithSuggestions()
     {
-        try{
-            $message = new \CMText\Message('Message Text', 'Sender_name', ['Recipient_PhoneNumber']);
-            $message
-                ->WithChannels([\CMText\Channels::RCS])
-                ->WithSuggestions([
-                    new \CMText\RichContent\Suggestions\ReplySuggestion('Opt In', 'OK'),
-                    new \CMText\RichContent\Suggestions\ReplySuggestion('Opt Out', 'STOP'),
-                ]);
-
-        }catch (\Exception $exception){
-            $message = null;
-
-        }
+        $message = new \CMText\Message('Message Text', 'Sender_name', ['Recipient_PhoneNumber']);
+        $message
+            ->WithChannels([\CMText\Channels::RCS])
+            ->WithSuggestions([
+                new \CMText\RichContent\Suggestions\ReplySuggestion('Opt In', 'OK'),
+                new \CMText\RichContent\Suggestions\ReplySuggestion('Opt Out', 'STOP'),
+            ]);
 
 
         $this->assertInstanceOf(

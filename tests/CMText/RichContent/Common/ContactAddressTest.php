@@ -3,6 +3,7 @@
 namespace CMText\RichContent\Common;
 
 use CMText\Exceptions\ContactAddressException;
+use CMText\Exceptions\ContactUrlException;
 use PHPUnit\Framework\TestCase;
 
 class ContactAddressTest extends TestCase
@@ -39,14 +40,18 @@ class ContactAddressTest extends TestCase
     public function testCountryCodeException()
     {
         // invalid country code
-        $this->setExpectedException(ContactAddressException::class, 'Invalid CountryCode');
+        $this->expectException(ContactAddressException::class);
+        $this->expectExceptionMessage('Invalid CountryCode');
+
         new ContactAddress('Breda', 'Netherlands', 'EXCEPTIONAL');
     }
 
     public function testAddressTypeException()
     {
         // unknown type
-        $this->setExpectedException(ContactAddressException::class, 'Unknown ContactAddress Type');
+        $this->expectException(ContactAddressException::class);
+        $this->expectExceptionMessage('Unknown ContactAddress Type');
+
         new ContactAddress('Breda', 'Netherlands', 'NL', 'Noord Brabant', 'Konijnenberg 30', 'EXCEPTIONAL', '4825BD');
     }
 }

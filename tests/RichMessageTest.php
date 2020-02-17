@@ -2,7 +2,10 @@
 require __DIR__ .'/../vendor/autoload.php';
 
 
-class RichMessageTest extends PHPUnit_Framework_TestCase
+use PHPUnit\Framework\TestCase;
+
+
+class RichMessageTest extends TestCase
 {
 
     /**
@@ -12,12 +15,7 @@ class RichMessageTest extends PHPUnit_Framework_TestCase
     {
         $testText = 'test rich text';
 
-        try {
-            $richText = new \CMText\RichContent\Messages\TextMessage($testText);
-
-        }catch (\Exception $e){
-            $richText = null;
-        }
+        $richText = new \CMText\RichContent\Messages\TextMessage($testText);
 
         $this->assertInstanceOf(
             \CMText\RichContent\Messages\TextMessage::class,
@@ -199,39 +197,32 @@ class RichMessageTest extends PHPUnit_Framework_TestCase
 
     public function testApplyMessageToRichContent()
     {
-        try {
-            $richContent = new \CMText\RichContent\RichContent();
+        $richContent = new \CMText\RichContent\RichContent();
+        $richContent->AddConversationPart(
+            new \CMText\RichContent\Messages\TextMessage('test rich text')
+        );
+
+
+        $this->assertInstanceOf(
+            \CMText\RichContent\RichContent::class,
+            $richContent
+        );
+
+        $this->assertJson( json_encode($richContent) );
+
+        $json = json_decode( json_encode($richContent) );
+
+        $this->assertCount(
+            1,
+            $json->conversation
+        );
+
+
+        //  add too many Conversation parts
+        $this->expectException(\CMText\Exceptions\ConversationLimitException::class);
+        for($i = 0; $i < \CMText\RichContent\RichContent::CONVERSATION_LENGTH_LIMIT; ++$i){
             $richContent->AddConversationPart(
                 new \CMText\RichContent\Messages\TextMessage('test rich text')
-            );
-
-
-            $this->assertInstanceOf(
-                \CMText\RichContent\RichContent::class,
-                $richContent
-            );
-
-            $this->assertJson( json_encode($richContent) );
-
-            $json = json_decode( json_encode($richContent) );
-
-            $this->assertCount(
-                1,
-                $json->conversation
-            );
-
-
-            //  add too many Conversation parts
-            for($i = 0; $i < \CMText\RichContent\RichContent::CONVERSATION_LENGTH_LIMIT; ++$i){
-                $richContent->AddConversationPart(
-                    new \CMText\RichContent\Messages\TextMessage('test rich text')
-                );
-            }
-
-        }catch (\CMText\Exceptions\ConversationLimitException $conversationLengthException){
-            $this->assertInstanceOf(
-                \CMText\Exceptions\ConversationLimitException::class,
-                $conversationLengthException
             );
         }
     }

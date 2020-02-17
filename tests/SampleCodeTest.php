@@ -2,7 +2,14 @@
 require __DIR__ .'/../vendor/autoload.php';
 
 
-class SampleCodeTest extends PHPUnit_Framework_TestCase
+use CMText\Channels;
+use CMText\Message;
+use CMText\RichContent\Messages\MediaMessage;
+use CMText\RichContent\Suggestions\ReplySuggestion;
+use PHPUnit\Framework\TestCase;
+
+
+class SampleCodeTest extends TestCase
 {
 
     /**
