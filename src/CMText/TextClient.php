@@ -10,7 +10,7 @@ use CMText\Exceptions\MessagesLimitException;
  *
  * @package CMText
  */
-class TextClient
+class TextClient implements ITextClient
 {
 
     /**
@@ -36,7 +36,7 @@ class TextClient
     /**
      * SDK Version constant
      */
-    const VERSION = '1.2.1';
+    const VERSION = '1.2.2';
 
 
     /**
